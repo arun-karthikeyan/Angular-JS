@@ -10,10 +10,10 @@
     "Restaurant"
   ],
   "authors": [
-    "Jogesh Muppala"
+    "Arun Karthikeyan"
   ],
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://github.com/the3drevolution/Angular-JS",
   "ignore": [
     "**/.*",
     "node_modules",
