@@ -28,22 +28,41 @@
   <div class="container">
     <div class="row row-content" ng-controller="menuController as menuCtrl">
       <div class="col-xs-12">
-        <ul class="media-list">
-          <li class="media" ng-repeat="dish in menuCtrl.dishes">
-            <div class="media-left media-middle">
-              <a href="#"><img class="media-object img-thumbnail" ng-src={{dish.image}} alt="Uthappizza"></a>
-            </div>
-            <div class="media-body">
-              <h2 class="media-heading">{{dish.name}}
-                <span class="label label-danger label-xs">{{dish.label}}</span>
-                <span class="badge">{{dish.price | currency}}<!-- Pipes the dish.price value through a currency filter so that it is displayed in a proper currency format--></span>
-              </h2>
-              <p style="position:relative; padding-top:8px">{{dish.description}}</p>
-              <p>Comment : {{dish.comment}}</p>
-              <p>Type your comment : <input type="text" ng-model="dish.comment"><!-- example of two-way binding --></input></p>
-            </div>
+        <ul class="nav nav-tabs" role="tablist">
+
+          <li role="presentation"  ng-class="{active:menuCtrl.isSelected(1)}">
+            <a aria-controls="all menu" role="tab" ng-click="menuCtrl.select(1)">The Menu</a>
           </li>
+
+          <li role="presentation" ng-class="{active:menuCtrl.isSelected(2)}">
+            <a aria-controls="appetizers" role="tab" ng-click="menuCtrl.select(2)">Appetizers</a>
+          </li>
+
+          <li role="presentation" ng-class="{active:menuCtrl.isSelected(3)}">
+            <a aria-controls="Mains" role="tab" ng-click="menuCtrl.select(3)">Mains</a>
+          </li>
+
+          <li role="presentation" ng-class="{active:menuCtrl.isSelected(4)}">
+            <a aria-controls="desserts" role="tab" ng-click="menuCtrl.select(4)">Desserts</a>
+          </li>
+
         </ul>
+        <div class="tab-content">
+          <ul class="media-list tab-pane fade in active">
+            <li class="media" ng-repeat="dish in (menuCtrl.dishes | filter:{category: menuCtrl.filtText})">
+              <div class="media-left media-middle">
+                <a href="#"><img class="media-object img-thumbnail" ng-src={{dish.image}} alt="Uthappizza"></a>
+              </div>
+              <div class="media-body">
+                <h2 class="media-heading">{{dish.name}}
+                  <span class="label label-danger label-xs">{{dish.label}}</span>
+                  <span class="badge">{{dish.price | currency}}<!-- Pipes the dish.price value through a currency filter so that it is displayed in a proper currency format--></span>
+                </h2>
+                <p style="position:relative; padding-top:8px">{{dish.description}}</p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -51,6 +70,10 @@
   <script>
   var app = angular.module('confusionApp',[]);
   app.controller('menuController', function(){
+
+    this.tab = 1;
+    this.filtText = "";
+
     dishes=[
       {
         name:'Uthapizza',
@@ -59,7 +82,7 @@
         label:'Hot',
         price:'4.99',
         description:'A unique combination of Indian Uthappam (pancake) and Italian pizza, topped with Cerignola olives, ripe vine cherry tomatoes, Vidalia onion, Guntur chillies and Buffalo Paneer.',
-        comment: ''
+        // comment: ''
       },
       {
         name:'Zucchipakoda',
@@ -68,7 +91,7 @@
         label:'',
         price:'1.99',
         description:'Deep fried Zucchini coated with mildly spiced Chickpea flour batter accompanied with a sweet-tangy tamarind sauce',
-        comment: ''
+        // comment: ''
       },
       {
         name:'Vadonut',
@@ -77,7 +100,7 @@
         label:'New',
         price:'1.99',
         description:'A quintessential ConFusion experience, is it a vada or is it a donut?',
-        comment: ''
+        // comment: ''
       },
       {
         name:'ElaiCheese Cake',
@@ -86,12 +109,30 @@
         label:'',
         price:'2.99',
         description:'A delectable, semi-sweet New York Style Cheese Cake, with Graham cracker crust and spiced with Indian cardamoms',
-        comment: ''
+        // comment: ''
       }
-    ]
-    //Doing this makes the dishes object available to the HTML
+    ];
+    //Doing this makes the 'dishes' object available to the HTML
     this.dishes = dishes;
+
+    this.select = function(setTab){
+      this.tab = setTab;
+      if(setTab === 2){
+        this.filtText="appetizer";
+      }else if (setTab === 3) {
+        this.filtText = "mains";
+      }else if (setTab === 4) {
+        this.filtText = "dessert"
+      }else {
+        this.filtText = "";
+      }
+    };
+
+    this.isSelected = function(tabNo){
+      return this.tab === tabNo;
+    };
   });
+
   </script>
 </body>
 
