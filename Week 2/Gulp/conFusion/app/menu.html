@@ -29,30 +29,31 @@
 <body>
 
   <div class="container">
-    <div class="row row-content" ng-controller="menuController as menuCtrl">
+    <div class="row row-content" ng-controller="MenuController">
       <div class="col-xs-12">
         <ul class="nav nav-tabs" role="tablist">
 
-          <li role="presentation"  ng-class="{active:menuCtrl.isSelected(1)}">
-            <a aria-controls="all menu" role="tab" ng-click="menuCtrl.select(1)">The Menu</a>
+          <li role="presentation"  ng-class="{active:isSelected(1)}">
+            <a aria-controls="all menu" role="tab" ng-click="select(1)">The Menu</a>
           </li>
 
-          <li role="presentation" ng-class="{active:menuCtrl.isSelected(2)}">
-            <a aria-controls="appetizers" role="tab" ng-click="menuCtrl.select(2)">Appetizers</a>
+          <li role="presentation" ng-class="{active:isSelected(2)}">
+            <a aria-controls="appetizers" role="tab" ng-click="select(2)">Appetizers</a>
           </li>
 
-          <li role="presentation" ng-class="{active:menuCtrl.isSelected(3)}">
-            <a aria-controls="Mains" role="tab" ng-click="menuCtrl.select(3)">Mains</a>
+          <li role="presentation" ng-class="{active:isSelected(3)}">
+            <a aria-controls="Mains" role="tab" ng-click="select(3)">Mains</a>
           </li>
 
-          <li role="presentation" ng-class="{active:menuCtrl.isSelected(4)}">
-            <a aria-controls="desserts" role="tab" ng-click="menuCtrl.select(4)">Desserts</a>
+          <li role="presentation" ng-class="{active:isSelected(4)}">
+            <a aria-controls="desserts" role="tab" ng-click="select(4)">Desserts</a>
           </li>
 
+          <button type="button" ng-click="toggleDescription()" class="btn btn-primary btn-xs pull-right">{{showDetails ? 'Hide Details' : 'Show Details'}}</button>
         </ul>
         <div class="tab-content">
           <ul class="media-list tab-pane fade in active">
-            <li class="media" ng-repeat="dish in (menuCtrl.dishes | filter:{category: menuCtrl.filtText})">
+            <li class="media" ng-repeat="dish in (dishes | filter:{category: filtText})">
               <div class="media-left media-middle">
                 <a href="#"><img class="media-object img-thumbnail" ng-src={{dish.image}} alt="Uthappizza"></a>
               </div>
@@ -61,11 +62,13 @@
                   <span class="label label-danger label-xs">{{dish.label}}</span>
                   <span class="badge">{{dish.price | currency}}<!-- Pipes the dish.price value through a currency filter so that it is displayed in a proper currency format--></span>
                 </h2>
-                <p style="position:relative; padding-top:8px">{{dish.description}}</p>
+                <!-- <p style="position:relative; padding-top:8px">{{showDetails ? dish.description : ''}}</p> -->
+                <p style="position:relative; padding-top:8px" ng-show="showDetails">{{dish.description}}</p>
               </div>
             </li>
           </ul>
         </div>
+
       </div>
     </div>
   </div>
