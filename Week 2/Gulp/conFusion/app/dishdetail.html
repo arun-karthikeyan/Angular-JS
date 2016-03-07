@@ -9,11 +9,13 @@
   content must come *after* these tags -->
   <title>Ristorante Con Fusion: Menu</title>
   <!-- Bootstrap -->
+  <!-- build:css styles/main.css -->
   <link href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="../bower_components/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
   <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
   <link href="styles/bootstrap-social.css" rel="stylesheet">
   <link href="styles/mystyles.css" rel="stylesheet">
+  <!-- endbuild -->
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -26,104 +28,102 @@
 <body>
 
   <div class="container">
-    <div class="row row-content" ng-controller="dishDetailController as ddc">
+    <div class="row row-content" ng-controller="DishDetailController">
       <div class="col-xs-12">
         <div class="media">
           <div class="media-left media-middle">
-            <a href="#"><img class="media-object img-thumbnail" ng-src="{{ddc.dish.image}}" alt="{{ddc.dish.name}}"></a>
+            <a href="#"><img class="media-object img-thumbnail" ng-src="{{dish.image}}" alt="{{dish.name}}"></a>
           </div>
           <div class="media-body">
             <h2 class="media-heading">
-              {{ddc.dish.name}}
-              <span class="label label-danger label-xs">{{ddc.dish.label}}</span>
-              <span class="badge">{{ddc.dish.price | currency}}<!-- Pipes the dish.price value through a currency filter so that it is displayed in a proper currency format--></span>
+              {{dish.name}}
+              <span class="label label-danger label-xs">{{dish.label}}</span>
+              <span class="badge">{{dish.price | currency}}<!-- Pipes the dish.price value through a currency filter so that it is displayed in a proper currency format--></span>
             </h2>
-            <p style="position:relative; padding-top:8px">{{ddc.dish.description}}</p>
+            <p style="position:relative; padding-top:8px">{{dish.description}}</p>
           </div>
         </div>
       </div>
-      <div class="col-xs-11 col-xs-offset-1">
+      <div class="col-xs-9 col-xs-offset-1">
         <div class="row">
           <div class="col-xs-3">
-            <h3>Customer Comments</h3>
+            <h4><strong>Customer Comments</strong></h4>
           </div>
           <div class="col-xs-4">
             <form class='form-inline'>
               <!-- setting this style to match the height of <h3> tag -->
-              <div class="form-group" style="margin-top:20px;">
-                <label class="control-label" for="orderByText" style="color:#777">Sort By</label>
-                <input class="form-control" type="text" id="orderByText" name="orderByText" ng-model="ddc.predicate">
+              <div class="form-group" style="margin-top:4px; margin-bottom:4px">
+                <label class="control-label" for="orderByText" style="color:#777">Sort By </label>
+                <input class="form-control" type="text" id="orderByText" name="orderByText" ng-model="predicate">
               </div>
             </form>
           </div>
-          <div class="col-xs-12" ng-repeat="comment in ddc.dish.comments | orderBy:ddc.predicate">
-            <blockquote>
-              <p>{{comment.rating}} Stars</p>
-              <p>{{comment.comment}}</p>
-              <footer>{{comment.author}}, {{comment.date | date:'MMM. dd, yyyy':'-0700'}}</footer>
-            </blockquote>
+          <div class="col-xs-12">
+            <ul class="list-unstyled">
+              <li ng-repeat="comment in dish.comments | orderBy:predicate">
+                <blockquote>
+                  <p>{{comment.rating}} Stars</p>
+                  <p>{{comment.comment}}</p>
+                  <footer>{{comment.author}}, {{comment.date | date:'MMM. dd, yyyy':'-0700'}}</footer>
+                </blockquote>
+              </li>
+            </ul>
           </div>
         </div>
+      </div>
+      <div class="col-xs-9 col-xs-offset-1" ng-controller="DishCommentController">
+        <ul class="list-unstyled">
+          <li ng-show="commentForm.$valid && !commentForm.$pristine">
+            <blockquote>
+              <p>{{previewComment.rating}} Stars</p>
+              <p>{{previewComment.comment}}</p>
+              <footer>{{previewComment.author}}</footer>
+            </blockquote>
+          </li>
+        </ul>
+        <form class="form-horizontal" name="commentForm" ng-submit="submitComment()" novalidate>
+          <div class='form-group' ng-class="{'has-error':commentForm.customer_name.$dirty && commentForm.customer_name.$error.required}">
+            <label for="customer_name" class="control-label col-sm-2 col-xs-12">Your Name</label>
+            <div class="col-sm-10 col-xs-12">
+              <input type="text" name="customer_name" id="customer_name" class="form-control" placeholder="Enter your name" ng-model="previewComment.author" required>
+              <span class="help-block" ng-show="commentForm.customer_name.$dirty && commentForm.customer_name.$error.required">your name is required</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="rating_5" class="control-label col-sm-2 col-xs-12">Number of Stars</label>
+            <div class="col-sm-10 col-xs-12">
+              <label class="control-label radio-inline" for="rating_1"><input type="radio" name="customer_rating" id="rating_1" value="1" ng-model="previewComment.rating" required>1</label>
+              <label class="control-label radio-inline" for="rating_2"><input type="radio" name="customer_rating" id="rating_2" value="2" ng-model="previewComment.rating">2</label>
+              <label class="control-label radio-inline" for="rating_3"><input type="radio" name="customer_rating" id="rating_3" value="3" ng-model="previewComment.rating">3</label>
+              <label class="control-label radio-inline" for="rating_4"><input type="radio" name="customer_rating" id="rating_4" value="4" ng-model="previewComment.rating">4</label>
+              <label class="control-label radio-inline" for="rating_5"><input type="radio" name="customer_rating" id="rating_5" value="5" ng-model="previewComment.rating">5</label>
+            </div>
+          </div>
+          <div class="form-group" ng-class="{'has-error':commentForm.customer_comments.$invalid && commentForm.customer_comments.$dirty}">
+            <label for="customer_comments" class="control-label col-sm-2 col-xs-12">Your Comments</label>
+            <div class="col-sm-10 col-xs-12">
+              <textarea class="form-control" id="customer_comments" name="customer_comments" rows="12" ng-model="previewComment.comment" required></textarea>
+              <span class="help-block" ng-show="commentForm.customer_comments.$invalid && commentForm.customer_comments.$dirty">your comment is required</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10 col-xs-12">
+              <button type="submit" class="btn btn-primary" ng-disabled="commentForm.$invalid">Submit Comment</button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
 
   </div>
 
+  <!-- build:js scripts/main.js -->
+  <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
   <script src="../bower_components/angular/angular.min.js"></script>
-  <script>
-  this.predicate='';
+  <script src="scripts/app.js"></script>
+  <!-- endbuild -->
 
-  var app = angular.module('confusionApp',[]);
-
-  app.controller('dishDetailController', function() {
-
-    var dish={
-      name:'Uthapizza',
-      image: 'images/uthapizza.png',
-      category: 'mains',
-      label:'Hot',
-      price:'4.99',
-      description:'A unique combination of Indian Uthappam (pancake) and Italian pizza, topped with Cerignola olives, ripe vine cherry tomatoes, Vidalia onion, Guntur chillies and Buffalo Paneer.',
-      comments: [
-        {
-          rating:5,
-          comment:"Imagine all the eatables, living in conFusion!",
-          author:"John Lemon",
-          date:"2012-10-16T17:57:28.556094Z"
-        },
-        {
-          rating:4,
-          comment:"Sends anyone to heaven, I wish I could get my mother-in-law to eat it!",
-          author:"Paul McVites",
-          date:"2014-09-05T17:57:28.556094Z"
-        },
-        {
-          rating:3,
-          comment:"Eat it, just eat it!",
-          author:"Michael Jaikishan",
-          date:"2015-02-13T17:57:28.556094Z"
-        },
-        {
-          rating:4,
-          comment:"Ultimate, Reaching for the stars!",
-          author:"Ringo Starry",
-          date:"2013-12-02T17:57:28.556094Z"
-        },
-        {
-          rating:2,
-          comment:"It's your birthday, we're gonna party!",
-          author:"25 Cent",
-          date:"2011-12-02T17:57:28.556094Z"
-        }
-
-      ]
-    };
-
-    this.dish = dish;
-
-  });
-
-  </script>
 
 </body>
 

@@ -100,7 +100,7 @@ gulp.task('usemin', function(){
     browserSync.init({
       server: {
         baseDir: "dist"
-        , index: "contactus.html"
+        , index: "dishdetail.html"
       }
     });
     cb();
