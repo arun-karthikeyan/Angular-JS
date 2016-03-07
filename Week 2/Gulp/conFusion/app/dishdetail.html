@@ -103,7 +103,7 @@
             <label for="customer_comments" class="control-label col-sm-2 col-xs-12">Your Comments</label>
             <div class="col-sm-10 col-xs-12">
               <textarea class="form-control" id="customer_comments" name="customer_comments" rows="12" ng-model="previewComment.comment" required></textarea>
-              <span class="help-block" ng-show="commentForm.customer_comments.$invalid && commentForm.customer_comments.$dirty">your comment is required</span>
+              <span class="help-block" ng-show="commentForm.customer_comments.$error.required && commentForm.customer_comments.$dirty">your comment is required</span>
             </div>
           </div>
           <div class="form-group">
