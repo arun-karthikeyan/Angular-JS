@@ -26,7 +26,6 @@ var runsequence = require('run-sequence').use(gulp);
 //Gulp JS Hint task - JS Hint must run synchronously before clean, so if there is any error it has to stop right there
 gulp.task('jshint', function(){
   return gulp.src('app/scripts/**/*.js')
-  .pipe(changed('dist/'))
   .pipe(jshint('.jshintrc'))
   .pipe(jshint.reporter(stylish));
 });
@@ -87,6 +86,16 @@ gulp.task('usemin', function(){
     .pipe(gulp.dest('dist/'));
   });
 
+  //Gulp viewsmin task - to minify and distribute the views to the ditribution directory
+  gulp.task('viewsmin', function(){
+    return gulp.src('app/views/*.html')
+    .pipe(htmlmin({
+      collapseWhitespace: true
+    }))
+    .pipe(gulp.dest('dist/views/'));
+
+  });
+
   //Gulp copy fonts task - add new font-dependencies here
   gulp.task('copyfonts', function(){
     //bootstrap fonts
@@ -109,13 +118,15 @@ gulp.task('usemin', function(){
   //Gulp watch task - needs browser-sync pre-req because watch enforces reload
   gulp.task('watch', ['browser-sync'], function(){
     //watching javascript, css and html files and run usemin on change and reload browser to load new changes
-    gulp.watch('{app/scripts/**/*.js,app/styles/**/*.css,app/**/*.html}', ['update-distribution-usemin', reload]);
+    gulp.watch('{app/scripts/**/*.js,app/styles/**/*.css,app/*.html}', ['update-distribution-usemin', reload]);
+    //watching html views and run viewsmin on change and reload browser to load new changes
+    gulp.watch('app/views/*.html', ['viewsmin', reload]);
     //watching image files and run imagemin on change and reload browser to load new changes
     gulp.watch('app/images/**/*', ['imagemin', reload]);
   });
 
   //build-distribution task
-  gulp.task('build-distribution', ['usemin', 'imagemin', 'copyfonts']);
+  gulp.task('build-distribution', ['usemin', 'viewsmin', 'imagemin', 'copyfonts']);
 
   //the default task
   gulp.task('default', function(cb){
@@ -123,6 +134,6 @@ gulp.task('usemin', function(){
   });
 
   //update-distribution-usemin
-  gulp.task('update-distribution-usemin', ['jshint'], function(cb){
-    runsequence('usemin', cb);
+  gulp.task('update-distribution-usemin', function(cb){
+    runsequence('jshint', 'usemin', cb);
   });

@@ -81,9 +81,9 @@ angular.module('confusionApp')
   };
 }])
 //Dish Detail Controller Code
-.controller('DishDetailController', ['$scope', '$routeParams', 'menuFactory', function($scope, $routeParams, menuFactory) {
+.controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', function($scope, $stateParams, menuFactory) {
   $scope.predicate='';
-  $scope.dish = menuFactory.getDish(parseInt($routeParams.id, 10));
+  $scope.dish = menuFactory.getDish(parseInt($stateParams.id, 10));
 
 }])
 //Dish Comment Controller Code
@@ -115,4 +115,14 @@ angular.module('confusionApp')
   //Step 1: Create a JavaScript object to hold the comment from the form
   $scope.initPreviewComment();
 
+}])
+
+//About Controller Code
+.controller('AboutController', ['$scope', function($scope){
+  //About controller code comes here
+}])
+
+//Index Controller code
+.controller('IndexController', ['$scope', function($scope){
+  //Index Controller code comes here
 }]);
