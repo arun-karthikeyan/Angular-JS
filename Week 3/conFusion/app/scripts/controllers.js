@@ -81,9 +81,9 @@ angular.module('confusionApp')
   };
 }])
 //Dish Detail Controller Code
-.controller('DishDetailController', ['$scope', 'menuFactory', function($scope, menuFactory) {
+.controller('DishDetailController', ['$scope', '$routeParams', 'menuFactory', function($scope, $routeParams, menuFactory) {
   $scope.predicate='';
-  $scope.dish = menuFactory.getDish(1);
+  $scope.dish = menuFactory.getDish(parseInt($routeParams.id, 10));
 
 }])
 //Dish Comment Controller Code
