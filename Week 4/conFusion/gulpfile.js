@@ -25,20 +25,20 @@ var runsequence = require('run-sequence').use(gulp);
 
 //Gulp JS Hint task - JS Hint must run synchronously before clean, so if there is any error it has to stop right there
 gulp.task('jshint', function(){
-  return gulp.src('app/scripts/**/*.js')
+  return gulp.src('./app/scripts/**/*.js')
   .pipe(jshint('.jshintrc'))
   .pipe(jshint.reporter(stylish));
 });
 
 //Gulp Imagemin task
 gulp.task('imagemin', function(){
-  return gulp.src('app/images/**/*')
-  .pipe(cache(imagemin({
+  return gulp.src('./app/images/**/*')
+  .pipe(imagemin({
     optimizationLevel: 3,
     progressive: true,
     interlaced: true
-  })))
-  .pipe(gulp.dest('dist/images'))
+  }))
+  .pipe(gulp.dest('./dist/images/'))
   .pipe(notify({
     message: 'All Images Optimized',
     onLast: true
@@ -67,7 +67,7 @@ gulp.task('clean', ['jshint'], function(){
 
 //Gulp usemin task - second method as described in the docs
 gulp.task('usemin', function(){
-  return gulp.src('app/*.html')
+  return gulp.src('./app/index.html')
   .pipe(usemin({
     css: [function() {return cleancss({
       keepSpecialComments: 0
@@ -83,16 +83,16 @@ gulp.task('usemin', function(){
         collapseWhitespace: true
       });}]
     }))
-    .pipe(gulp.dest('dist/'));
+    .pipe(gulp.dest('./dist/'));
   });
 
   //Gulp viewsmin task - to minify and distribute the views to the ditribution directory
   gulp.task('viewsmin', function(){
-    return gulp.src('app/views/*.html')
+    return gulp.src('./app/views/*.html')
     .pipe(htmlmin({
       collapseWhitespace: true
     }))
-    .pipe(gulp.dest('dist/views/'));
+    .pipe(gulp.dest('./dist/views/'));
 
   });
 
@@ -118,11 +118,11 @@ gulp.task('usemin', function(){
   //Gulp watch task - needs browser-sync pre-req because watch enforces reload
   gulp.task('watch', ['browser-sync'], function(){
     //watching javascript, css and html files and run usemin on change and reload browser to load new changes
-    gulp.watch('{app/scripts/**/*.js,app/styles/**/*.css,app/*.html}', ['update-distribution-usemin', reload]);
+    gulp.watch('{./app/scripts/**/*.js,./app/styles/**/*.css,./app/*.html}', ['update-distribution-usemin', reload]);
     //watching html views and run viewsmin on change and reload browser to load new changes
-    gulp.watch('app/views/*.html', ['viewsmin', reload]);
+    gulp.watch('./app/views/*.html', ['viewsmin', reload]);
     //watching image files and run imagemin on change and reload browser to load new changes
-    gulp.watch('app/images/**/*', ['imagemin', reload]);
+    gulp.watch('./app/images/**/*', ['imagemin', reload]);
   });
 
   //build-distribution task

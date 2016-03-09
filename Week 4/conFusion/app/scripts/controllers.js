@@ -39,29 +39,34 @@ angular.module('confusionApp')
 
         .controller('ContactController', ['$scope', function($scope) {
 
-            $scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"" };
+            $scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"", invalidChannelSelection: false };
 
             var channels = [{value:"tel", label:"Tel."}, {value:"Email",label:"Email"}];
 
             $scope.channels = channels;
-            $scope.invalidChannelSelection = false;
 
         }])
 
-        .controller('FeedbackController', ['$scope','$parent', function($scope,$parent) {
+        .controller('FeedbackController', ['$scope', function($scope) {
 
             $scope.sendFeedback = function() {
 
                 console.log($scope.feedback);
 
-                if ($scope.feedback.agree && ($scope.feedback.mychannel === "")) {
-                    $scope.invalidChannelSelection = true;
+                if ($scope.feedback.agree && (($scope.feedback.mychannel === "") || ($scope.feedback.mychannel===null) || ($scope.feedback.mychannel===undefined))) {
+                    $scope.feedback.invalidChannelSelection = true;
                     console.log('incorrect');
                 }
                 else {
-                    $scope.invalidChannelSelection = false;
-                    $parent.$scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"" };
+                    $scope.feedback.invalidChannelSelection = false;
+                    $scope.feedback.firstName="";
+                    $scope.feedback.lastName="";
+                    $scope.feedback.agree=false;
+                    $scope.feedback.email="";
                     $scope.feedback.mychannel="";
+                    $scope.feedback.comments="";
+                    $scope.feedback.tel.number="";
+                    $scope.feedback.tel.areaCode="";
                     $scope.feedbackForm.$setPristine();
                     console.log($scope.feedback);
                 }
