@@ -1,0 +1,31 @@
+{
+  "name": "conFusion",
+  "version": "1.0.0",
+  "description": "Website for an awesome restaurant",
+  "main": "index.html",
+  "moduleType": [],
+  "keywords": [
+    "conFusion",
+    "Fusion",
+    "Restaurant"
+  ],
+  "authors": [
+    "Arun Karthikeyan"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/the3drevolution/Angular-JS",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.6",
+    "font-awesome": "^4.5.0",
+    "angular": "^1.5.0",
+    "angular-route": "^1.5.0",
+    "angular-ui-router": "^0.2.18"
+  }
+}
