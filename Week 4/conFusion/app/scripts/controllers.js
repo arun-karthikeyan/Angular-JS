@@ -8,23 +8,11 @@ angular.module('confusionApp')
   $scope.filtText = '';
   $scope.showDetails = false;
 
-  $scope.showMenu = false;
+  $scope.showMenu = true;
   $scope.message = "Loading...";
-  $scope.dishes={};
-
-  menuFactory.getDishes()
-  .then(
-    //success function
-    function(response){
-      $scope.dishes = response.data;
-      $scope.showMenu = true;
-    },
-    //error function
-    function(response){
-      $scope.message = "Error: "+response.status + " " +response.statusText;
-    }
-  );
-
+  //it is initially assigned with an empty array,
+  //once the response is received from the server, the data is loaded into $scope.dishes
+  $scope.dishes= menuFactory.getDishes().query();
 
   $scope.select = function(setTab) {
     $scope.tab = setTab;
@@ -90,19 +78,10 @@ angular.module('confusionApp')
 
 .controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', function($scope, $stateParams, menuFactory) {
 
-  $scope.showDish = false;
+  $scope.showDish = true;
   $scope.message = "Loading...";
-
-  $scope.dish = {};
-  menuFactory.getDish(parseInt($stateParams.id,10))
-  .then(function(response){
-    $scope.dish = response.data;
-    $scope.showDish = true;
-  },
-function(response){
-  $scope.message = "Error: "+response.status+" "+response.statusText;
-});
-
+  //this way the getDishes method will return the specific dish that we are asking for
+  $scope.dish = menuFactory.getDishes().get({id:parseInt($stateParams.id, 10)});
 
 }])
 
@@ -140,19 +119,12 @@ function(response){
   var executiveChefIdx = 3;
   var promotionIdx = 0;
 
-  $scope.showFeaturedDish = false;
+  $scope.showFeaturedDish = true;
   $scope.featuredDishMessage = "Loading...";
 
   $scope.promotion = menuFactory.getPromotion(promotionIdx);
-  $scope.featuredDish = {};
+  $scope.featuredDish = menuFactory.getDishes().get({id: featuredDishIdx});
 
-  menuFactory.getDish(featuredDishIdx).then(function(response){
-    $scope.featuredDish = response.data;
-    $scope.showFeaturedDish = true;
-  }, function(response){
-    $scope.featuredDishMessage = "Error: "+response.status+" "+response.statusText;
-  });
-  
   $scope.specialist = corporateFactory.getLeader(executiveChefIdx);
 
 }])
