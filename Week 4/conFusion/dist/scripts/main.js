@@ -402,129 +402,166 @@ angular.module('confusionApp', ['ui.router'])
 
 angular.module('confusionApp')
 
-        .controller('MenuController', ['$scope', 'menuFactory', function($scope, menuFactory) {
+.controller('MenuController', ['$scope', 'menuFactory', function($scope, menuFactory) {
 
-            $scope.tab = 1;
-            $scope.filtText = '';
-            $scope.showDetails = false;
+  $scope.tab = 1;
+  $scope.filtText = '';
+  $scope.showDetails = false;
 
-            $scope.dishes= menuFactory.getDishes();
+  $scope.showMenu = false;
+  $scope.message = "Loading...";
+  $scope.dishes={};
+
+  menuFactory.getDishes()
+  .then(
+    //success function
+    function(response){
+      $scope.dishes = response.data;
+      $scope.showMenu = true;
+    },
+    //error function
+    function(response){
+      $scope.message = "Error: "+response.status + " " +response.statusText;
+    }
+  );
 
 
-            $scope.select = function(setTab) {
-                $scope.tab = setTab;
+  $scope.select = function(setTab) {
+    $scope.tab = setTab;
 
-                if (setTab === 2) {
-                    $scope.filtText = "appetizer";
-                }
-                else if (setTab === 3) {
-                    $scope.filtText = "mains";
-                }
-                else if (setTab === 4) {
-                    $scope.filtText = "dessert";
-                }
-                else {
-                    $scope.filtText = "";
-                }
-            };
+    if (setTab === 2) {
+      $scope.filtText = "appetizer";
+    }
+    else if (setTab === 3) {
+      $scope.filtText = "mains";
+    }
+    else if (setTab === 4) {
+      $scope.filtText = "dessert";
+    }
+    else {
+      $scope.filtText = "";
+    }
+  };
 
-            $scope.isSelected = function (checkTab) {
-                return ($scope.tab === checkTab);
-            };
+  $scope.isSelected = function (checkTab) {
+    return ($scope.tab === checkTab);
+  };
 
-            $scope.toggleDetails = function() {
-                $scope.showDetails = !$scope.showDetails;
-            };
-        }])
+  $scope.toggleDetails = function() {
+    $scope.showDetails = !$scope.showDetails;
+  };
+}])
 
-        .controller('ContactController', ['$scope', function($scope) {
+.controller('ContactController', ['$scope', function($scope) {
 
-            $scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"", invalidChannelSelection: false };
+  $scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"", invalidChannelSelection: false };
 
-            var channels = [{value:"tel", label:"Tel."}, {value:"Email",label:"Email"}];
+  var channels = [{value:"tel", label:"Tel."}, {value:"Email",label:"Email"}];
 
-            $scope.channels = channels;
+  $scope.channels = channels;
 
-        }])
+}])
 
-        .controller('FeedbackController', ['$scope', function($scope) {
+.controller('FeedbackController', ['$scope', function($scope) {
 
-            $scope.sendFeedback = function() {
+  $scope.sendFeedback = function() {
 
-                console.log($scope.feedback);
+    console.log($scope.feedback);
 
-                if ($scope.feedback.agree && (($scope.feedback.mychannel === "") || ($scope.feedback.mychannel===null) || ($scope.feedback.mychannel===undefined))) {
-                    $scope.feedback.invalidChannelSelection = true;
-                    console.log('incorrect');
-                }
-                else {
-                    $scope.feedback.invalidChannelSelection = false;
-                    $scope.feedback.firstName="";
-                    $scope.feedback.lastName="";
-                    $scope.feedback.agree=false;
-                    $scope.feedback.email="";
-                    $scope.feedback.mychannel="";
-                    $scope.feedback.comments="";
-                    $scope.feedback.tel.number="";
-                    $scope.feedback.tel.areaCode="";
-                    $scope.feedbackForm.$setPristine();
-                    console.log($scope.feedback);
-                }
-            };
-        }])
+    if ($scope.feedback.agree && (($scope.feedback.mychannel === "") || ($scope.feedback.mychannel===null) || ($scope.feedback.mychannel===undefined))) {
+      $scope.feedback.invalidChannelSelection = true;
+      console.log('incorrect');
+    }
+    else {
+      $scope.feedback.invalidChannelSelection = false;
+      $scope.feedback.firstName="";
+      $scope.feedback.lastName="";
+      $scope.feedback.agree=false;
+      $scope.feedback.email="";
+      $scope.feedback.mychannel="";
+      $scope.feedback.comments="";
+      $scope.feedback.tel.number="";
+      $scope.feedback.tel.areaCode="";
+      $scope.feedbackForm.$setPristine();
+      console.log($scope.feedback);
+    }
+  };
+}])
 
-        .controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', function($scope, $stateParams, menuFactory) {
+.controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', function($scope, $stateParams, menuFactory) {
 
-            var dish= menuFactory.getDish(parseInt($stateParams.id,10));
+  $scope.showDish = false;
+  $scope.message = "Loading...";
 
-            $scope.dish = dish;
+  $scope.dish = {};
+  menuFactory.getDish(parseInt($stateParams.id,10))
+  .then(function(response){
+    $scope.dish = response.data;
+    $scope.showDish = true;
+  },
+function(response){
+  $scope.message = "Error: "+response.status+" "+response.statusText;
+});
 
-        }])
 
-        .controller('DishCommentController', ['$scope', function($scope) {
+}])
 
-          $scope.initPreviewComment = function(){
-            $scope.previewComment = {};
-            $scope.previewComment.author = "";
-            $scope.previewComment.rating = "5"; //setting default initial rating
-            $scope.previewComment.comment = "";
-            $scope.previewComment.date = "";
-          };
+.controller('DishCommentController', ['$scope', function($scope) {
 
-          $scope.submitComment = function () {
+  $scope.initPreviewComment = function(){
+    $scope.previewComment = {};
+    $scope.previewComment.author = "";
+    $scope.previewComment.rating = "5"; //setting default initial rating
+    $scope.previewComment.comment = "";
+    $scope.previewComment.date = "";
+  };
 
-            // Step 2: This is how you record the date
-            $scope.previewComment.date = new Date().toISOString();
+  $scope.submitComment = function () {
 
-            // Step 3: Push your comment into the dish's comment array
-            $scope.dish.comments.push($scope.previewComment);
+    // Step 2: This is how you record the date
+    $scope.previewComment.date = new Date().toISOString();
 
-            //Step 4: reset your form to pristine
-            $scope.commentForm.$setPristine();
+    // Step 3: Push your comment into the dish's comment array
+    $scope.dish.comments.push($scope.previewComment);
 
-            //Step 5: reset your JavaScript object that holds your comment
-            $scope.initPreviewComment();
-          };
+    //Step 4: reset your form to pristine
+    $scope.commentForm.$setPristine();
 
-          //Step 1: Create a JavaScript object to hold the comment from the form
-          $scope.initPreviewComment();
-        }])
+    //Step 5: reset your JavaScript object that holds your comment
+    $scope.initPreviewComment();
+  };
 
-        .controller('IndexController', ['$scope', 'corporateFactory', 'menuFactory', function($scope, corporateFactory, menuFactory){
-          var featuredDishIdx = 0;
-          var executiveChefIdx = 3;
-          var promotionIdx = 0;
-          $scope.promotion = menuFactory.getPromotion(promotionIdx);
-          $scope.featuredDish = menuFactory.getDish(featuredDishIdx);
-          $scope.specialist = corporateFactory.getLeader(executiveChefIdx);
+  //Step 1: Create a JavaScript object to hold the comment from the form
+  $scope.initPreviewComment();
+}])
 
-        }])
+.controller('IndexController', ['$scope', 'corporateFactory', 'menuFactory', function($scope, corporateFactory, menuFactory){
+  var featuredDishIdx = 0;
+  var executiveChefIdx = 3;
+  var promotionIdx = 0;
 
-        .controller('AboutController', ['$scope', 'corporateFactory', function($scope, corporateFactory){
-          var leadership = corporateFactory.getLeaders();
-          $scope.leadership = leadership;
-        }])
-        // implement the IndexController and About Controller here
+  $scope.showFeaturedDish = false;
+  $scope.featuredDishMessage = "Loading...";
+
+  $scope.promotion = menuFactory.getPromotion(promotionIdx);
+  $scope.featuredDish = {};
+
+  menuFactory.getDish(featuredDishIdx).then(function(response){
+    $scope.featuredDish = response.data;
+    $scope.showFeaturedDish = true;
+  }, function(response){
+    $scope.featuredDishMessage = "Error: "+response.status+" "+response.statusText;
+  });
+  
+  $scope.specialist = corporateFactory.getLeader(executiveChefIdx);
+
+}])
+
+.controller('AboutController', ['$scope', 'corporateFactory', function($scope, corporateFactory){
+  var leadership = corporateFactory.getLeaders();
+  $scope.leadership = leadership;
+}])
+// implement the IndexController and About Controller here
 
 
 ;
@@ -532,179 +569,9 @@ angular.module('confusionApp')
 'use strict';
 
 angular.module('confusionApp')
+        .constant("baseURL", "http://localhost:3000/")
+        .service('menuFactory',['$http', 'baseURL', function($http, baseURL) {
 
-        .service('menuFactory', function() {
-
-            var dishes=[
-                         {
-                          _id:0,
-                          name:'Uthapizza',
-                          image: 'images/uthapizza.png',
-                          category: 'mains',
-                          label:'Hot',
-                          price:'4.99',
-                          description:'A unique combination of Indian Uthappam (pancake) and Italian pizza, topped with Cerignola olives, ripe vine cherry tomatoes, Vidalia onion, Guntur chillies and Buffalo Paneer.',
-                           comments: [
-                               {
-                                   rating:5,
-                                   comment:"Imagine all the eatables, living in conFusion!",
-                                   author:"John Lemon",
-                                   date:"2012-10-16T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:4,
-                                   comment:"Sends anyone to heaven, I wish I could get my mother-in-law to eat it!",
-                                   author:"Paul McVites",
-                                   date:"2014-09-05T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:3,
-                                   comment:"Eat it, just eat it!",
-                                   author:"Michael Jaikishan",
-                                   date:"2015-02-13T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:4,
-                                   comment:"Ultimate, Reaching for the stars!",
-                                   author:"Ringo Starry",
-                                   date:"2013-12-02T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:2,
-                                   comment:"It's your birthday, we're gonna party!",
-                                   author:"25 Cent",
-                                   date:"2011-12-02T17:57:28.556094Z"
-                               }
-
-                           ]
-                        },
-                        {
-                          _id:1,
-                          name:'Zucchipakoda',
-                          image: 'images/zucchipakoda.png',
-                          category: 'appetizer',
-                          label:'',
-                          price:'1.99',
-                          description:'Deep fried Zucchini coated with mildly spiced Chickpea flour batter accompanied with a sweet-tangy tamarind sauce',
-                          comments: [
-                               {
-                                   rating:5,
-                                   comment:"Imagine all the eatables, living in conFusion!",
-                                   author:"John Lemon",
-                                   date:"2012-10-16T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:4,
-                                   comment:"Sends anyone to heaven, I wish I could get my mother-in-law to eat it!",
-                                   author:"Paul McVites",
-                                   date:"2014-09-05T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:3,
-                                   comment:"Eat it, just eat it!",
-                                   author:"Michael Jaikishan",
-                                   date:"2015-02-13T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:4,
-                                   comment:"Ultimate, Reaching for the stars!",
-                                   author:"Ringo Starry",
-                                   date:"2013-12-02T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:2,
-                                   comment:"It's your birthday, we're gonna party!",
-                                   author:"25 Cent",
-                                   date:"2011-12-02T17:57:28.556094Z"
-                               }
-
-                           ]
-                        },
-                        {
-                          _id:2,
-                          name:'Vadonut',
-                          image: 'images/vadonut.png',
-                          category: 'appetizer',
-                          label:'New',
-                          price:'1.99',
-                          description:'A quintessential ConFusion experience, is it a vada or is it a donut?',
-                           comments: [
-                               {
-                                   rating:5,
-                                   comment:"Imagine all the eatables, living in conFusion!",
-                                   author:"John Lemon",
-                                   date:"2012-10-16T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:4,
-                                   comment:"Sends anyone to heaven, I wish I could get my mother-in-law to eat it!",
-                                   author:"Paul McVites",
-                                   date:"2014-09-05T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:3,
-                                   comment:"Eat it, just eat it!",
-                                   author:"Michael Jaikishan",
-                                   date:"2015-02-13T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:4,
-                                   comment:"Ultimate, Reaching for the stars!",
-                                   author:"Ringo Starry",
-                                   date:"2013-12-02T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:2,
-                                   comment:"It's your birthday, we're gonna party!",
-                                   author:"25 Cent",
-                                   date:"2011-12-02T17:57:28.556094Z"
-                               }
-
-                           ]
-                        },
-                        {
-                          _id:3,
-                          name:'ElaiCheese Cake',
-                          image: 'images/elaicheesecake.png',
-                          category: 'dessert',
-                          label:'',
-                          price:'2.99',
-                          description:'A delectable, semi-sweet New York Style Cheese Cake, with Graham cracker crust and spiced with Indian cardamoms',
-                           comments: [
-                               {
-                                   rating:5,
-                                   comment:"Imagine all the eatables, living in conFusion!",
-                                   author:"John Lemon",
-                                   date:"2012-10-16T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:4,
-                                   comment:"Sends anyone to heaven, I wish I could get my mother-in-law to eat it!",
-                                   author:"Paul McVites",
-                                   date:"2014-09-05T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:3,
-                                   comment:"Eat it, just eat it!",
-                                   author:"Michael Jaikishan",
-                                   date:"2015-02-13T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:4,
-                                   comment:"Ultimate, Reaching for the stars!",
-                                   author:"Ringo Starry",
-                                   date:"2013-12-02T17:57:28.556094Z"
-                               },
-                               {
-                                   rating:2,
-                                   comment:"It's your birthday, we're gonna party!",
-                                   author:"25 Cent",
-                                   date:"2011-12-02T17:57:28.556094Z"
-                               }
-
-                           ]
-                        }
-                        ];
             var promotions = [
                 {
                           _id:0,
@@ -719,13 +586,13 @@ angular.module('confusionApp')
 
                 this.getDishes = function(){
 
-                    return dishes;
+                    return $http.get(baseURL+"dishes");
 
                 };
 
                 this.getDish = function (index) {
 
-                    return dishes[index];
+                    return $http.get(baseURL+"dishes/"+index);
                 };
 
                 // implement a function named getPromotion
@@ -736,7 +603,7 @@ angular.module('confusionApp')
                 };
 
 
-        })
+        }])
 
         .factory('corporateFactory', function() {
 
