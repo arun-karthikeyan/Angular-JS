@@ -424,11 +424,18 @@ angular.module('confusionApp')
   $scope.filtText = '';
   $scope.showDetails = false;
 
-  $scope.showMenu = true;
+  $scope.showMenu = false;
   $scope.message = "Loading...";
   //it is initially assigned with an empty array,
   //once the response is received from the server, the data is loaded into $scope.dishes
-  $scope.dishes= menuFactory.getDishes().query();
+  $scope.dishes= menuFactory.getDishes().query(
+    function(response){
+      $scope.dishes = response;
+      $scope.showMenu = true;
+    }, function(response){
+      $scope.message = "Error: "+response.status+" "+response.statusText;
+    }
+  );
 
   $scope.select = function(setTab) {
     $scope.tab = setTab;
@@ -494,14 +501,22 @@ angular.module('confusionApp')
 
 .controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', function($scope, $stateParams, menuFactory) {
 
-  $scope.showDish = true;
+  $scope.showDish = false;
   $scope.message = "Loading...";
   //this way the getDishes method will return the specific dish that we are asking for
-  $scope.dish = menuFactory.getDishes().get({id:parseInt($stateParams.id, 10)});
+  $scope.dish = menuFactory.getDishes().get({id:parseInt($stateParams.id, 10)}).$promise.then(
+    function(response){
+      $scope.dish = response;
+      $scope.showDish = true;
+    },
+    function(response){
+      $scope.message = "Error: "+response.status+" "+response.statusText;
+    }
+  );
 
 }])
 
-.controller('DishCommentController', ['$scope', function($scope) {
+.controller('DishCommentController', ['$scope', 'menuFactory', function($scope,menuFactory) {
 
   $scope.initPreviewComment = function(){
     $scope.previewComment = {};
@@ -519,6 +534,10 @@ angular.module('confusionApp')
     // Step 3: Push your comment into the dish's comment array
     $scope.dish.comments.push($scope.previewComment);
 
+    //Update the comment in the server side also so that it is persisted
+    //First parameter is the id, the second parameter is the updated dish
+    menuFactory.getDishes().update({id:$scope.dish.id},$scope.dish);
+
     //Step 4: reset your form to pristine
     $scope.commentForm.$setPristine();
 
@@ -535,11 +554,18 @@ angular.module('confusionApp')
   var executiveChefIdx = 3;
   var promotionIdx = 0;
 
-  $scope.showFeaturedDish = true;
+  $scope.showFeaturedDish = false;
   $scope.featuredDishMessage = "Loading...";
 
   $scope.promotion = menuFactory.getPromotion(promotionIdx);
-  $scope.featuredDish = menuFactory.getDishes().get({id: featuredDishIdx});
+  $scope.featuredDish = menuFactory.getDishes().get({id: featuredDishIdx}).$promise.then(
+    function(response){
+      $scope.featuredDish = response;
+      $scope.showFeaturedDish = true;
+    }, function(response){
+      $scope.featuredDishMessage = "Error: "+response.status+" "+response.statusText;
+    }
+  );
 
   $scope.specialist = corporateFactory.getLeader(executiveChefIdx);
 
