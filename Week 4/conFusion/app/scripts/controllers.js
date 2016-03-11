@@ -49,7 +49,7 @@ angular.module('confusionApp')
 
 .controller('ContactController', ['$scope', function($scope) {
 
-  $scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"", invalidChannelSelection: false };
+  $scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"", tel: {number: "", areaCode: ""}};
 
   var channels = [{value:"tel", label:"Tel."}, {value:"Email",label:"Email"}];
 
@@ -57,30 +57,41 @@ angular.module('confusionApp')
 
 }])
 
-.controller('FeedbackController', ['$scope', function($scope) {
+.controller('FeedbackController', ['$scope', 'feedbackFactory', function($scope, feedbackFactory) {
+
+  function resetFeedback(){
+    $scope.feedback.firstName="";
+    $scope.feedback.lastName="";
+    $scope.feedback.agree=false;
+    $scope.feedback.email="";
+    $scope.feedback.mychannel="";
+    $scope.feedback.comments="";
+    $scope.feedback.tel.number="";
+    $scope.feedback.tel.areaCode="";
+    $scope.feedbackForm.$setPristine();
+  }
 
   $scope.sendFeedback = function() {
 
-    console.log($scope.feedback);
-
     if ($scope.feedback.agree && (($scope.feedback.mychannel === "") || ($scope.feedback.mychannel===null) || ($scope.feedback.mychannel===undefined))) {
-      $scope.feedback.invalidChannelSelection = true;
-      console.log('incorrect');
+      $scope.invalidChannelSelection = true;
     }
     else {
-      $scope.feedback.invalidChannelSelection = false;
-      $scope.feedback.firstName="";
-      $scope.feedback.lastName="";
-      $scope.feedback.agree=false;
-      $scope.feedback.email="";
-      $scope.feedback.mychannel="";
-      $scope.feedback.comments="";
-      $scope.feedback.tel.number="";
-      $scope.feedback.tel.areaCode="";
-      $scope.feedbackForm.$setPristine();
-      console.log($scope.feedback);
+      $scope.invalidChannelSelection = false;
+      if(!$scope.feedback.agree){
+        $scope.feedback.mychannel="";
+      }
+      var feedbackResource = feedbackFactory.getFeedbackResource();
+      feedbackResource.save($scope.feedback, function(response){
+        console.log("Entry added", response);
+        resetFeedback();
+      }, function(response){
+        console.log("Failed to add entry: "+response.status+" "+response.statusText);
+        resetFeedback();
+      });
     }
   };
+
 }])
 
 .controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', function($scope, $stateParams, menuFactory) {
@@ -102,35 +113,23 @@ angular.module('confusionApp')
 
 .controller('DishCommentController', ['$scope', 'menuFactory', function($scope,menuFactory) {
 
-  $scope.initPreviewComment = function(){
+  function initPreviewComment(){
     $scope.previewComment = {};
     $scope.previewComment.author = "";
     $scope.previewComment.rating = "5"; //setting default initial rating
     $scope.previewComment.comment = "";
     $scope.previewComment.date = "";
-  };
+  }
 
   $scope.submitComment = function () {
-
-    // Step 2: This is how you record the date
     $scope.previewComment.date = new Date().toISOString();
-
-    // Step 3: Push your comment into the dish's comment array
     $scope.dish.comments.push($scope.previewComment);
-
-    //Update the comment in the server side also so that it is persisted
-    //First parameter is the id, the second parameter is the updated dish
     menuFactory.getDishes().update({id:$scope.dish.id},$scope.dish);
-
-    //Step 4: reset your form to pristine
     $scope.commentForm.$setPristine();
-
-    //Step 5: reset your JavaScript object that holds your comment
-    $scope.initPreviewComment();
+    initPreviewComment();
   };
 
-  //Step 1: Create a JavaScript object to hold the comment from the form
-  $scope.initPreviewComment();
+  initPreviewComment();
 }])
 
 .controller('IndexController', ['$scope', 'corporateFactory', 'menuFactory', function($scope, corporateFactory, menuFactory){
@@ -141,7 +140,12 @@ angular.module('confusionApp')
   $scope.showFeaturedDish = false;
   $scope.featuredDishMessage = "Loading...";
 
-  $scope.promotion = menuFactory.getPromotion(promotionIdx);
+  $scope.showSpecialist = false;
+  $scope.specialistMessage = "Loading...";
+
+  $scope.showPromotion = false;
+  $scope.promotionMessage = "Loading...";
+
   $scope.featuredDish = menuFactory.getDishes().get({id: featuredDishIdx}).$promise.then(
     function(response){
       $scope.featuredDish = response;
@@ -151,13 +155,40 @@ angular.module('confusionApp')
     }
   );
 
-  $scope.specialist = corporateFactory.getLeader(executiveChefIdx);
+  $scope.specialist = corporateFactory.getLeaders().get({id: executiveChefIdx}).$promise.then(
+    function(response){
+      $scope.specialist = response;
+      $scope.showSpecialist = true;
+    },
+    function(response){
+      $scope.specialistMessage = "Error: "+response.status+" "+response.statusText;
+    }
+  );
+
+  $scope.promotion = menuFactory.getPromotions().get({id: promotionIdx}).$promise.then(
+    function(response){
+      $scope.promotion = response;
+      $scope.showPromotion = true;
+    },
+    function(response){
+      $scope.promotionMessage = "Error: "+response.status+" "+response.statusText;
+    }
+  );
 
 }])
 
 .controller('AboutController', ['$scope', 'corporateFactory', function($scope, corporateFactory){
-  var leadership = corporateFactory.getLeaders();
-  $scope.leadership = leadership;
+
+  $scope.showLeaders = false;
+  $scope.message = "Loading...";
+
+  $scope.leadership = corporateFactory.getLeaders().query(function(response){
+    $scope.showLeaders = true;
+    $scope.leadership = response;
+  }, function(response){
+    $scope.message = "Error: "+response.status+" "+response.statusText;
+  });
+
 }])
 // implement the IndexController and About Controller here
 

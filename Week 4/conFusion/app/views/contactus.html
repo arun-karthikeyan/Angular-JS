@@ -62,7 +62,7 @@
               <span ng-show="feedbackForm.lastname.$error.required && !feedbackForm.lastname.$pristine" class="help-block">Your Last name is required.</span>
             </div>
           </div>
-          <div class="form-group" ng-class="{'has-error' : feedback.mychannel==='tel' && (feedbackForm.telnum.$invalid || feedbackForm.areacode.$invalid)}">
+          <div class="form-group" ng-class="{'has-error' : feedback.agree && feedback.mychannel==='tel' && (feedbackForm.telnum.$invalid || feedbackForm.areaCode.$invalid)}">
             <label for="telnum" class="col-sm-2 control-label">Contact Tel.</label>
             <div class="col-xs-5 col-sm-4 col-md-3">
               <div class="input-group">
@@ -77,7 +77,7 @@
 
             </div>
             <div class="col-sm-10 col-sm-offset-2">
-              <span ng-show="feedback.mychannel==='tel' && (feedbackForm.telnum.$invalid || feedbackForm.areacode.$invalid)" class='help-block'>Enter your area code and telephone number.</span>
+              <span ng-show="feedback.agree && feedback.mychannel==='tel' && (feedbackForm.telnum.$invalid || feedbackForm.areaCode.$invalid)" class='help-block'>Enter your area code and telephone number.</span>
             </div>
           </div>
           <div class="form-group" ng-class="{'has-error has-feedback':feedbackForm.emailid.$invalid && !feedbackForm.emailid.$pristine}">
@@ -88,7 +88,7 @@
               <span ng-show="(feedbackForm.emailid.$invalid || feedbackForm.emailid.$error.required) && !feedbackForm.emailid.$pristine" class="help-block">Enter a valid email address.</span>
             </div>
           </div>
-          <div class="form-group" ng-class="{'has-error':feedback.invalidChannelSelection && feedback.agree}">
+          <div class="form-group" ng-class="{'has-error':invalidChannelSelection && feedback.agree}">
             <div class="checkbox col-sm-5 col-sm-offset-2">
               <label class="checkbox-inline">
                 <input type="checkbox" name="approve" value="" ng-model="feedback.agree">
@@ -99,13 +99,14 @@
               <select class="form-control" ng-model="feedback.mychannel" ng-options="channel.value as channel.label for channel in channels">
                 <option value="">Tel. / Email ?</option>
               </select>
-              <span ng-show="feedback.invalidChannelSelection" class="help-block">Select an option.</span>
+              <span ng-show="invalidChannelSelection" class="help-block">Select an option.</span>
             </div>
           </div>
-          <div class="form-group">
+          <div class="form-group" ng-class="{'has-error':feedbackForm.feedback.$dirty && feedbackForm.feedback.$error.required}">
             <label for="feedback" class="col-sm-2 control-label">Your Feedback</label>
             <div class="col-sm-10">
-              <textarea class="form-control" id="feedback" name="feedback" rows="12" ng-model="feedback.comments"></textarea>
+              <textarea class="form-control" id="feedback" name="feedback" rows="12" ng-model="feedback.comments" required></textarea>
+              <span ng-show="feedbackForm.feedback.$dirty && feedbackForm.feedback.$error.required" class="help-block">Your feedback is required</span>
             </div>
           </div>
           <div class="form-group">

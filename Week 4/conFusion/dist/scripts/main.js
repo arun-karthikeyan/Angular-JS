@@ -465,7 +465,7 @@ angular.module('confusionApp')
 
 .controller('ContactController', ['$scope', function($scope) {
 
-  $scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"", invalidChannelSelection: false };
+  $scope.feedback = {mychannel:"", firstName:"", lastName:"", agree:false, email:"", tel: {number: "", areaCode: ""}};
 
   var channels = [{value:"tel", label:"Tel."}, {value:"Email",label:"Email"}];
 
@@ -473,30 +473,41 @@ angular.module('confusionApp')
 
 }])
 
-.controller('FeedbackController', ['$scope', function($scope) {
+.controller('FeedbackController', ['$scope', 'feedbackFactory', function($scope, feedbackFactory) {
+
+  function resetFeedback(){
+    $scope.feedback.firstName="";
+    $scope.feedback.lastName="";
+    $scope.feedback.agree=false;
+    $scope.feedback.email="";
+    $scope.feedback.mychannel="";
+    $scope.feedback.comments="";
+    $scope.feedback.tel.number="";
+    $scope.feedback.tel.areaCode="";
+    $scope.feedbackForm.$setPristine();
+  }
 
   $scope.sendFeedback = function() {
 
-    console.log($scope.feedback);
-
     if ($scope.feedback.agree && (($scope.feedback.mychannel === "") || ($scope.feedback.mychannel===null) || ($scope.feedback.mychannel===undefined))) {
-      $scope.feedback.invalidChannelSelection = true;
-      console.log('incorrect');
+      $scope.invalidChannelSelection = true;
     }
     else {
-      $scope.feedback.invalidChannelSelection = false;
-      $scope.feedback.firstName="";
-      $scope.feedback.lastName="";
-      $scope.feedback.agree=false;
-      $scope.feedback.email="";
-      $scope.feedback.mychannel="";
-      $scope.feedback.comments="";
-      $scope.feedback.tel.number="";
-      $scope.feedback.tel.areaCode="";
-      $scope.feedbackForm.$setPristine();
-      console.log($scope.feedback);
+      $scope.invalidChannelSelection = false;
+      if(!$scope.feedback.agree){
+        $scope.feedback.mychannel="";
+      }
+      var feedbackResource = feedbackFactory.getFeedbackResource();
+      feedbackResource.save($scope.feedback, function(response){
+        console.log("Entry added", response);
+        resetFeedback();
+      }, function(response){
+        console.log("Failed to add entry: "+response.status+" "+response.statusText);
+        resetFeedback();
+      });
     }
   };
+
 }])
 
 .controller('DishDetailController', ['$scope', '$stateParams', 'menuFactory', function($scope, $stateParams, menuFactory) {
@@ -518,35 +529,23 @@ angular.module('confusionApp')
 
 .controller('DishCommentController', ['$scope', 'menuFactory', function($scope,menuFactory) {
 
-  $scope.initPreviewComment = function(){
+  function initPreviewComment(){
     $scope.previewComment = {};
     $scope.previewComment.author = "";
     $scope.previewComment.rating = "5"; //setting default initial rating
     $scope.previewComment.comment = "";
     $scope.previewComment.date = "";
-  };
+  }
 
   $scope.submitComment = function () {
-
-    // Step 2: This is how you record the date
     $scope.previewComment.date = new Date().toISOString();
-
-    // Step 3: Push your comment into the dish's comment array
     $scope.dish.comments.push($scope.previewComment);
-
-    //Update the comment in the server side also so that it is persisted
-    //First parameter is the id, the second parameter is the updated dish
     menuFactory.getDishes().update({id:$scope.dish.id},$scope.dish);
-
-    //Step 4: reset your form to pristine
     $scope.commentForm.$setPristine();
-
-    //Step 5: reset your JavaScript object that holds your comment
-    $scope.initPreviewComment();
+    initPreviewComment();
   };
 
-  //Step 1: Create a JavaScript object to hold the comment from the form
-  $scope.initPreviewComment();
+  initPreviewComment();
 }])
 
 .controller('IndexController', ['$scope', 'corporateFactory', 'menuFactory', function($scope, corporateFactory, menuFactory){
@@ -557,7 +556,12 @@ angular.module('confusionApp')
   $scope.showFeaturedDish = false;
   $scope.featuredDishMessage = "Loading...";
 
-  $scope.promotion = menuFactory.getPromotion(promotionIdx);
+  $scope.showSpecialist = false;
+  $scope.specialistMessage = "Loading...";
+
+  $scope.showPromotion = false;
+  $scope.promotionMessage = "Loading...";
+
   $scope.featuredDish = menuFactory.getDishes().get({id: featuredDishIdx}).$promise.then(
     function(response){
       $scope.featuredDish = response;
@@ -567,13 +571,40 @@ angular.module('confusionApp')
     }
   );
 
-  $scope.specialist = corporateFactory.getLeader(executiveChefIdx);
+  $scope.specialist = corporateFactory.getLeaders().get({id: executiveChefIdx}).$promise.then(
+    function(response){
+      $scope.specialist = response;
+      $scope.showSpecialist = true;
+    },
+    function(response){
+      $scope.specialistMessage = "Error: "+response.status+" "+response.statusText;
+    }
+  );
+
+  $scope.promotion = menuFactory.getPromotions().get({id: promotionIdx}).$promise.then(
+    function(response){
+      $scope.promotion = response;
+      $scope.showPromotion = true;
+    },
+    function(response){
+      $scope.promotionMessage = "Error: "+response.status+" "+response.statusText;
+    }
+  );
 
 }])
 
 .controller('AboutController', ['$scope', 'corporateFactory', function($scope, corporateFactory){
-  var leadership = corporateFactory.getLeaders();
-  $scope.leadership = leadership;
+
+  $scope.showLeaders = false;
+  $scope.message = "Loading...";
+
+  $scope.leadership = corporateFactory.getLeaders().query(function(response){
+    $scope.showLeaders = true;
+    $scope.leadership = response;
+  }, function(response){
+    $scope.message = "Error: "+response.status+" "+response.statusText;
+  });
+
 }])
 // implement the IndexController and About Controller here
 
@@ -586,20 +617,6 @@ angular.module('confusionApp')
 .constant("baseURL", "http://localhost:3000/")
 .service('menuFactory',['$resource', 'baseURL', function($resource, baseURL) {
 
-  var promotions = [
-    {
-      _id:0,
-      name:'Weekend Grand Buffet',
-      image: 'images/buffet.png',
-      label:'New',
-      price:'19.99',
-      description:'Featuring mouthwatering combinations with a choice of five different salads, six enticing appetizers, six main entrees and five choicest desserts. Free flowing bubbly and soft drinks. All for just $19.99 per person ',
-    }
-
-  ];
-
-  //the this.getDish method is no longer needed, doing a .query() on the resource method,
-  //will return the entire dishes array & calling it with a particular dish id can retrieve a particular dish.
   this.getDishes = function(){
 
     return $resource(baseURL+"dishes/:id", null,
@@ -607,65 +624,31 @@ angular.module('confusionApp')
 
   };
 
-  // implement a function named getPromotion
-  // that returns a selected promotion.
-
-  this.getPromotion = function(index){
-    return promotions[index];
+  this.getPromotions = function(){
+    return $resource(baseURL+"promotions/:id");
   };
 
 
 }])
 
-.factory('corporateFactory', function() {
+.factory('corporateFactory',['$resource', 'baseURL', function($resource, baseURL) {
 
   var corpfac = {};
 
-  var leadership = [
-    {
-      name: "Peter Pan",
-      image: 'images/alberto.png',
-      designation: "Chief Epicurious Officer",
-      abbr: "CEO",
-      description: "Our CEO, Peter, credits his hardworking East Asian immigrant parents who undertook the arduous journey to the shores of America with the intention of giving their children the best future. His mother's wizardy in the kitchen whipping up the tastiest dishes with whatever is available inexpensively at the supermarket, was his first inspiration to create the fusion cuisines for which The Frying Pan became well known. He brings his zeal for fusion cuisines to this restaurant, pioneering cross-cultural culinary connections."
-    },
-    {
-      name: "Dhanasekaran Witherspoon",
-      image: 'images/alberto.png',
-      designation: "Chief Food Officer",
-      abbr: "CFO",
-      description: "Our CFO, Danny, as he is affectionately referred to by his colleagues, comes from a long established family tradition in farming and produce. His experiences growing up on a farm in the Australian outback gave him great appreciation for varieties of food sources. As he puts it in his own words, Everything that runs, wins, and everything that stays, pays!"
-    },
-    {
-      name: "Agumbe Tang",
-      image: 'images/alberto.png',
-      designation: "Chief Taste Officer",
-      abbr: "CTO",
-      description: "Blessed with the most discerning gustatory sense, Agumbe, our CFO, personally ensures that every dish that we serve meets his exacting tastes. Our chefs dread the tongue lashing that ensues if their dish does not meet his exacting standards. He lives by his motto, You click only if you survive my lick."
-    },
-    {
-      name: "Alberto Somayya",
-      image: 'images/alberto.png',
-      designation: "Executive Chef",
-      abbr: "EC",
-      description: "Award winning three-star Michelin chef with wide International experience having worked closely with whos-who in the culinary world, he specializes in creating mouthwatering Indo-Italian fusion experiences. He says, Put together the cuisines from the two craziest cultures, and you get a winning hit! Amma Mia!"
-    }
-
-  ];
-
-  // Implement two functions, one named getLeaders,
-  // the other named getLeader(index)
-  // Remember this is a factory not a service
-
   corpfac.getLeaders = function(){
-    return leadership;
-  };
-
-  corpfac.getLeader = function(index){
-    return leadership[index];
+    return $resource(baseURL+'leadership/:id');
   };
 
   return corpfac;
-})
+}])
 
-;
+.factory('feedbackFactory', ['$resource', 'baseURL', function($resource, baseURL){
+
+  var feedbackFac = {};
+
+  feedbackFac.getFeedbackResource = function(){
+    return $resource(baseURL+'feedback/:id');
+  };
+
+  return feedbackFac;
+}]);
