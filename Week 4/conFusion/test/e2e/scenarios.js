@@ -52,4 +52,49 @@ describe('menu 0 item', function(){
   });
 });
 
+describe('Feedback form', function(){
+
+  //navigate to the contactus page
+  beforeEach(function(){
+    browser.get('index.html#/contactus');
+  })
+
+  it('should correctly validate e-mail addresses', function(){
+    var emailElement = element(by.model('feedback.email'));
+    var invalidEmailHelpBlock = element(by.id('invalidEmail'));
+    var invalidEmailGlyphicon = element(by.id('invalidEmailGlyphicon'));
+    var emailDiv = element(by.id('emailDiv'));
+    var sendFeedbackButton = element(by.buttonText('Send Feedback'));
+    var invalidEmail = 'arun@';
+    var validEmail = 'akarthi2@asu.edu'
+    //invalid e-mail
+    emailElement.sendKeys(invalidEmail);
+    //the invalid flag should be setup
+    expect(emailElement.evaluate('feedbackForm.emailid.$invalid')).toBeTruthy();
+    //the enter a valid-email address help-block should be shown - ngShow
+    expect(invalidEmailHelpBlock.isDisplayed()).toBeTruthy();
+    //the corresponding glyphicon also has to be shown - ngShow
+    expect(invalidEmailGlyphicon.isDisplayed()).toBeTruthy();
+    //corresponding has-error classes should also be setup
+    expect(emailDiv.getAttribute('class')).toMatch(/has-error has-feedback/);
+    //the Send Feedback button has to be disabled
+    expect(sendFeedbackButton.getAttribute('disabled')).toBeTruthy();
+
+    //should ask user to enter proper email address even if the text box is cleared
+    emailElement.clear();
+    expect(emailElement.evaluate('feedbackForm.emailid.$invalid')).toBeTruthy();
+    expect(invalidEmailHelpBlock.isDisplayed()).toBeTruthy();
+    expect(invalidEmailGlyphicon.isDisplayed()).toBeTruthy();
+    expect(emailDiv.getAttribute('class')).toMatch(/has-error has-feedback/);
+
+    //no errors should be displayed after proper e-mail address has been entered
+    emailElement.sendKeys(validEmail);
+    expect(emailElement.evaluate('feedbackForm.emailid.$invalid')).toBeFalsy();
+    expect(invalidEmailHelpBlock.isDisplayed()).toBeFalsy();
+    expect(invalidEmailGlyphicon.isDisplayed()).toBeFalsy();
+    expect(emailDiv.getAttribute('class')).not.toMatch(/has-error has-feedback/);
+  });
+
+});
+
 });
