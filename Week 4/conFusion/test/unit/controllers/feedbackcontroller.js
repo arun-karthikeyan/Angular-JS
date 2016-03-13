@@ -43,19 +43,21 @@ function initScopeFeedback(){
 }
 
 initScopeFeedback();
+//holding the $scope.feedback reference
+var feedbackReference = $scope.feedback;
 //setting up the httpback end server
 var postResponse = $httpBackend.whenPOST("http://localhost:3000/feedback").respond(201,'');
 $scope.sendFeedback();
 
-//checking if it gets reset before success call
-expect($scope.feedback.firstName).not.toEqual("");
-expect($scope.feedback.lastName).not.toEqual("");
-expect($scope.feedback.agree).toBeTruthy();
-expect($scope.feedback.email).not.toEqual("");
-expect($scope.feedback.mychannel).not.toEqual("");
-expect($scope.feedback.comments).not.toEqual("");
-expect($scope.feedback.tel.number).not.toEqual("");
-expect($scope.feedback.tel.areaCode).not.toEqual("");
+//checking if the reference gets reset before success call
+expect(feedbackReference.firstName).not.toEqual("");
+expect(feedbackReference.lastName).not.toEqual("");
+expect(feedbackReference.agree).toBeTruthy();
+expect(feedbackReference.email).not.toEqual("");
+expect(feedbackReference.mychannel).not.toEqual("");
+expect(feedbackReference.comments).not.toEqual("");
+expect(feedbackReference.tel.number).not.toEqual("");
+expect(feedbackReference.tel.areaCode).not.toEqual("");
 
 //the feedbacks have to be reset after success response from server
 $httpBackend.flush(); //response from the server
@@ -70,17 +72,19 @@ expect($scope.feedback.tel.number).toEqual("");
 expect($scope.feedback.tel.areaCode).toEqual("");
 
 initScopeFeedback();
+feedbackReference = $scope.feedback;
+
 postResponse.respond(404,'Resource Not Found');
 $scope.sendFeedback();
-//checking if it gets reset before error call
-expect($scope.feedback.firstName).not.toEqual("");
-expect($scope.feedback.lastName).not.toEqual("");
-expect($scope.feedback.agree).toBeTruthy();
-expect($scope.feedback.email).not.toEqual("");
-expect($scope.feedback.mychannel).not.toEqual("");
-expect($scope.feedback.comments).not.toEqual("");
-expect($scope.feedback.tel.number).not.toEqual("");
-expect($scope.feedback.tel.areaCode).not.toEqual("");
+//checking if the reference gets reset before success call
+expect(feedbackReference.firstName).not.toEqual("");
+expect(feedbackReference.lastName).not.toEqual("");
+expect(feedbackReference.agree).toBeTruthy();
+expect(feedbackReference.email).not.toEqual("");
+expect(feedbackReference.mychannel).not.toEqual("");
+expect(feedbackReference.comments).not.toEqual("");
+expect(feedbackReference.tel.number).not.toEqual("");
+expect(feedbackReference.tel.areaCode).not.toEqual("");
 //the feedbacks have to be reset after error response from server
 $httpBackend.flush(); //response from the server
 
